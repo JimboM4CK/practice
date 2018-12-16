@@ -16,7 +16,7 @@
                             :data-hour="timeSlot.hour" 
                             :data-minute="timeSlot.minute | formattedMinute" 
                             class="diary-row"
-                        >
+                        > 
                             <span v-if="timeSlot.minute == 0" class="hour">{{ timeSlot.hour }}</span>
                             <span class="minutes">{{ timeSlot.minute | formattedMinute }}</span>
                         </div>
@@ -39,10 +39,6 @@
 
 <script>
 
-import { StaffMember } from '@/models/StaffMember.js' 
-import { Entry } from '@/models/Entry.js' 
-import { EntryDetail } from '@/models/EntryDetail.js'
-
 export default {
     name: 'Diary',
     props: ['staffMembers', 'diaryEntries'],
@@ -54,6 +50,9 @@ export default {
             error: null,
             loading: false,
             timer: null,
+            practice: [],
+            staffMembers: [],
+            diaryItems: [],
         }
     },
     computed: {
@@ -81,8 +80,11 @@ export default {
             this.practice = this.staffMembers = this.entries = this.error = null;
             this.loading = true;
             
-            //fetch diary data for date this.date
+            let hasError = false;
             
+            //fetch diary data for date this.date
+            this.practice = this.$store.getters.practice();
+
             this.$api.get('practice', {}, (error, data) => {
                 if(error) return this.error = this.error ? this.error : error;
                 this.practice = data;
