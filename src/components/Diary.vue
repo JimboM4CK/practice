@@ -50,9 +50,6 @@ export default {
             error: null,
             loading: false,
             timer: null,
-            practice: [],
-            staffMembers: [],
-            diaryItems: [],
         }
     },
     computed: {
@@ -77,6 +74,8 @@ export default {
     },
     methods: {
         fetchData(){
+            this.$api.login({email: "james.mackay@gmail.com", password: "Test"});
+
             this.practice = this.staffMembers = this.entries = this.error = null;
             this.loading = true;
             
