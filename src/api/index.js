@@ -5,11 +5,10 @@ export default {
         return Api().post('/login', {
             email: params.email,
             password: params.password
-        }).then(function(response){
-            console.log(response.data.token);
-            axios.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.token;
-        }).catch(function(response){
-            console.log(response);
+        }).then(response => {
+            return {token: response.data.token};
+        }).catch(error => {
+            return {error: error}
         });
     },
     getPractice (params) {

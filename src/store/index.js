@@ -1,35 +1,44 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import Api from '@/api/api.js'
+//import { isContext } from 'vm';
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  strict: process.env.NODE_ENV !== 'production',
   state: {
     lastUpdate: {},
+    JWT: '',
   },
   getters: {
+    JWT: state => {
+      return state.JWT;
+    },
+    isLoggedIn: state => {
+      //TODO: Read JWT file and make sure is valid
 
+      return state.JWT ? true : false;
+    }
   },
   mutations: {
-
+    setJWT (state, payload) {
+      state.JWT = payload.token;
+    }
   },
   actions: {
-    setLastUpdate(type){
-      lastUpdate.prototype.type = new Date()
-    },
+    
     checkForUpdates(){
-      let response = await this.$api.checkForUpdates()
+      //let response = await this.$api.checkForUpdates()
       //response
       //checks through a table that has last table update for that company
       //iterate response rows and check lastUpdate objects
       //update if needed
     },
-    updatePractice(){
-      //fetch practice data
-      this.actions.setLastUpdate('practice')
+    updateCompany(){
+      //fetch company data
+      //this.actions.setLastUpdate('')
       
     }
-  }
+  },
+  
+  strict: process.env.NODE_ENV !== 'production'
 })

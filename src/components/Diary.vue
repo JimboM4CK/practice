@@ -41,7 +41,6 @@
 
 export default {
     name: 'Diary',
-    props: ['staffMembers', 'diaryEntries'],
 
     data(){
         return {
@@ -50,6 +49,9 @@ export default {
             error: null,
             loading: false,
             timer: null,
+            practice: [],
+            staffMembers: [],
+            entries: [],
         }
     },
     computed: {
@@ -68,50 +70,63 @@ export default {
             }
             return slots;
         }
+        
     },
     watch: {
         date: 'fetchData',
     },
     methods: {
+        login(){
+            if(!this.$store.getters.isLoggedIn){
+                this.$api.login({email: "james.mackay@gmail.com", password: "Test"}).then( data => {
+                    this.$store.commit('setJWT', data);
+                }).catch( data => {
+                    console.log(data.error);
+                });
+            }
+        },
         fetchData(){
-            this.$api.login({email: "james.mackay@gmail.com", password: "Test"});
 
-            this.practice = this.staffMembers = this.entries = this.error = null;
-            this.loading = true;
-            
-            let hasError = false;
-            
-            //fetch diary data for date this.date
-            this.practice = this.$store.getters.practice();
+            if(this.$store.getters.isLoggedIn){
 
-            this.$api.get('practice', {}, (error, data) => {
-                if(error) return this.error = this.error ? this.error : error;
-                this.practice = data;
-            });
+                //this.practice = this.staffMembers = this.entries = this.error = null;
+                this.loading = true;
+                
+                let hasError = false;
+                
+                //fetch diary data for date this.date
+                this.practice = this.$store.getters.practice();
 
-            this.$api.get('staffMembers', {}, (error, data) => {
-                if(error) return this.error = this.error ? this.error : error;
-                data.staffMembers.forEach((staffMember, index) => {
-                    let staffMemberObject = new StaffMember();
-                    staffMember.forEach((value, index) => { staffMemberObject.index = value; });
-                    diary.staffMembers.push(staffMemberObject);
+                this.$api.get('practice', {}, (error, data) => {
+                    if(error) return this.error = this.error ? this.error : error;
+                    this.practice = data;
                 });
-            });
 
-            this.$api.get('diary', {date: this.date}, (error, data) => {
-                if(error) return this.error = this.error ? this.error : error;
-                data.staffMembers.forEach((staffMember, index) => {
-                    let staffMemberObject = new StaffMember();
-                    staffMember.forEach((value, index) => { staffMemberObject.index = value; });
-                    diary.staffMembers.push(staffMemberObject);
+                this.$api.get('staffMembers', {}, (error, data) => {
+                    if(error) return this.error = this.error ? this.error : error;
+                    data.staffMembers.forEach((staffMember, index) => {
+                        let staffMemberObject = new StaffMember();
+                        staffMember.forEach((value, index) => { staffMemberObject.index = value; });
+                        diary.staffMembers.push(staffMemberObject);
+                    });
                 });
-            });
-            
 
-            //set loaded diary objects to component data: diary
-            this.diary = diary;
-            this.loading = false;
-            this.loaded = true;
+                this.$api.get('diary', {date: this.date}, (error, data) => {
+                    if(error) return this.error = this.error ? this.error : error;
+                    data.staffMembers.forEach((staffMember, index) => {
+                        let staffMemberObject = new StaffMember();
+                        staffMember.forEach((value, index) => { staffMemberObject.index = value; });
+                        diary.staffMembers.push(staffMemberObject);
+                    });
+                });
+                
+
+                //set loaded diary objects to component data: diary
+                this.diary = diary;
+                this.loading = false;
+                this.loaded = true;
+
+            }
         }
     },
     filters: {
@@ -120,6 +135,7 @@ export default {
         }
     },
     created (){
+        this.login();
         this.fetchData();
         this.timer = setInterval(this.fetchData, 5000);
     },
