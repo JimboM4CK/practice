@@ -12,18 +12,38 @@ export default {
         });
     },
     getPractice (params) {
-        return Api().get(`/practice/${params.id}`)
+        Api().get(`/practice/${params.id}`).then(response => {
+            return response.data;
+        }).catch(error => {
+            return {error: error}
+        });
     },
-    getServicesCategories () {
-        return Api().get(`/services/categories/`)
+    getServiceCategories () {
+        return Api().get(`/services/categories/`).then(response => {
+            return response.data;
+        }).catch(error => {
+            return {error: error}
+        });
     },
-    getServicesCategory ( params ) {
-        return Api().get(`/services/categories/${params.id}`)
+    getServiceCategory ( params ) {
+        return Api().get(`/services/categories/${params.id}`).then(response => {
+            return response.data;
+        }).catch(error => {
+            return {error: error}
+        });
     },
     getServices () {
-        return Api().get(`/services`)
+        return Api().get(`/services`).then(response => {
+            return response.data;
+        }).catch(error => {
+            return {error: error}
+        });
     },
     getService (params) {
-        return Api().get(`/services/${params.id}`)
+        return Api().get(`/services/${params.id}`).then(response => {
+            return response.data;
+        }).catch(error => {
+            return {error: error}
+        });
     }
 }

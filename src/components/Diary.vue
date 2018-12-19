@@ -88,7 +88,10 @@ export default {
         fetchData(){
 
             if(this.$store.getters.isLoggedIn){
-
+                this.$api.getServiceCategories().then( data => {
+                    console.log(data);
+                });
+                
                 //this.practice = this.staffMembers = this.entries = this.error = null;
                 this.loading = true;
                 
