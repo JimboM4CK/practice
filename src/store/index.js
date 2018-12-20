@@ -7,13 +7,22 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     lastUpdate: {},
+    diaryData: {},
     userInfo: {},
     groupInfo: {},
+    companyInfo: {},
+    diaryDate: new Date(),
     JWT: '',
   },
   getters: {
     JWT: state => {
       return state.JWT;
+    },
+    diaryData: state => {
+      return state.diaryData;
+    },
+    diaryDate: state => {
+      return state.diaryDate;
     },
     isLoggedIn: state => {
       //TODO: Read JWT file and make sure is valid
@@ -24,6 +33,9 @@ export default new Vuex.Store({
     },
     groupInfo: state => {
       return state.groupInfo;
+    },
+    companyInfo: state => {
+      return state.companyInfo;
     }
   },
   mutations: {
@@ -35,6 +47,21 @@ export default new Vuex.Store({
     },
     setGroupInfo(state, payload){
       state.groupInfo = payload;
+    },
+    setCompanyInfo(state, payload){
+      state.companyInfo = payload;
+    },
+    setDiaryData(state, payload){
+      state.diaryData = payload.date;
+    },
+    setDiaryDate(state, payload){
+      state.diaryDate = payload.date;
+    },
+    incrementDiaryDate(state){
+      state.diaryDate.setDate(state.diaryDate.getDate() + 1);
+    },
+    decrementDiaryDate(state){
+      state.diaryDate.setDate(state.diaryDate.getDate() - 1);
     }
   },
   actions: {
@@ -51,12 +78,39 @@ export default new Vuex.Store({
       //this.actions.setLastUpdate('')
       
     },
-    updateUserGroupInfo( context ){
-      this.$api.Groups.getGroup(this.$store.getters.userInfo.GroupID).then( data => {
+    fetchGroupInfo( context, payload ){
+      this.$api.groups.getGroup(payload.id).then( data => {
         context.commit('setGroupInfo', data);
       });
+    },
+    fetchCompanyInfo( context, payload ){
+      this.$api.groups.getGroup(payload.id).then( data => {
+        context.commit('setCompanyInfo', data);
+      });
+    },
+    
+    login(context, payload){
+      if(!this.$store.getters.isLoggedIn){
+        this.$api.login({email: payload.email, password: payload.password}).then( data => {
+            context.commit('setJWT', data);
+        });
+      }
+    },
+    async loadDiary(context){
+      if(!this.$store.getters.isLoggedIn){
+        let diaryStaff = this.$api.diary.getDiaryStaff({date: this.$store.getters.diaryDate}).then( data => {
+          return data;
+        });
+        let diaryEntries = this.$api.diary.getDiaryEntries({date: this.$store.getters.diaryDate}).then( data => {
+          return data;
+        });
+        let data = {};
+        data.diaryStaff = await diaryStaff;
+        data.diaryStaff = await diaryEntries;
+        context.commit('setDiaryData', data);
+      }
     }
+
   },
-  
   strict: process.env.NODE_ENV !== 'production'
 })

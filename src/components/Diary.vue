@@ -76,56 +76,16 @@ export default {
         date: 'fetchData',
     },
     methods: {
-        login(){
-            if(!this.$store.getters.isLoggedIn){
-                this.$api.login({email: "james.mackay@gmail.com", password: "Test"}).then( data => {
-                    this.$store.commit('setJWT', data);
-                }).catch( data => {
-                    console.log(data.error);
-                });
-            }
-        },
         fetchData(){
 
             if(this.$store.getters.isLoggedIn){
+                
 
-
-                
-                
-                this.$api.getServiceCategories().then( data => {
-                    console.log(data);
-                });
-                
                 //this.practice = this.staffMembers = this.entries = this.error = null;
                 this.loading = true;
                 
-                let hasError = false;
-                
                 //fetch diary data for date this.date
-                this.practice = this.$store.getters.practice();
-
-                this.$api.get('practice', {}, (error, data) => {
-                    if(error) return this.error = this.error ? this.error : error;
-                    this.practice = data;
-                });
-
-                this.$api.get('staffMembers', {}, (error, data) => {
-                    if(error) return this.error = this.error ? this.error : error;
-                    data.staffMembers.forEach((staffMember, index) => {
-                        let staffMemberObject = new StaffMember();
-                        staffMember.forEach((value, index) => { staffMemberObject.index = value; });
-                        diary.staffMembers.push(staffMemberObject);
-                    });
-                });
-
-                this.$api.get('diary', {date: this.date}, (error, data) => {
-                    if(error) return this.error = this.error ? this.error : error;
-                    data.staffMembers.forEach((staffMember, index) => {
-                        let staffMemberObject = new StaffMember();
-                        staffMember.forEach((value, index) => { staffMemberObject.index = value; });
-                        diary.staffMembers.push(staffMemberObject);
-                    });
-                });
+                this.$store.dispatch('diaryData', {date: this.$store.getters.diaryDate});
                 
 
                 //set loaded diary objects to component data: diary
@@ -142,7 +102,11 @@ export default {
         }
     },
     created (){
-        this.login();
+        //TODO: CREATE LOGIN PAGE
+        this.$store.dispatch('login', {email: "james.mackay@gmail.com", password: "Test"});
+        this.$store.dispatch('diaryData');
+        
+
         this.fetchData();
         this.timer = setInterval(this.fetchData, 5000);
     },

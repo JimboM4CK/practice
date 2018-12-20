@@ -1,9 +1,12 @@
 import Api from '@/api/api'
 import Groups from '@/api/groups'
+import Companies from '@/api/companies'
+import Diary from '@/api/diary'
 
 export default {
     Groups: Groups,
-
+    Companies: Companies,
+    Diary: Diary,
     login (params) {
         return Api().post('/login', {
             email: params.email,
