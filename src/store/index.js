@@ -7,6 +7,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     lastUpdate: {},
+    userInfo: {},
+    groupInfo: {},
     JWT: '',
   },
   getters: {
@@ -15,13 +17,24 @@ export default new Vuex.Store({
     },
     isLoggedIn: state => {
       //TODO: Read JWT file and make sure is valid
-
       return state.JWT ? true : false;
+    },
+    userInfo: state => {
+      return state.userInfo;
+    },
+    groupInfo: state => {
+      return state.groupInfo;
     }
   },
   mutations: {
     setJWT (state, payload) {
       state.JWT = payload.token;
+    },
+    setUserInfo(state, payload){
+      state.userInfo = payload;
+    },
+    setGroupInfo(state, payload){
+      state.groupInfo = payload;
     }
   },
   actions: {
@@ -37,6 +50,11 @@ export default new Vuex.Store({
       //fetch company data
       //this.actions.setLastUpdate('')
       
+    },
+    updateUserGroupInfo( context ){
+      this.$api.Groups.getGroup(this.$store.getters.userInfo.GroupID).then( data => {
+        context.commit('setGroupInfo', data);
+      });
     }
   },
   

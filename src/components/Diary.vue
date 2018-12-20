@@ -88,6 +88,10 @@ export default {
         fetchData(){
 
             if(this.$store.getters.isLoggedIn){
+
+
+                
+                
                 this.$api.getServiceCategories().then( data => {
                     console.log(data);
                 });

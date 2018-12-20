@@ -1,6 +1,9 @@
 import Api from '@/api/api'
+import Groups from '@/api/groups'
 
 export default {
+    Groups: Groups,
+
     login (params) {
         return Api().post('/login', {
             email: params.email,
@@ -12,12 +15,13 @@ export default {
         });
     },
     getPractice (params) {
-        Api().get(`/practice/${params.id}`).then(response => {
+        return Api().get(`/practice/${params.id}`).then(response => {
             return response.data;
         }).catch(error => {
             return {error: error}
         });
     },
+    
     getServiceCategories () {
         return Api().get(`/services/categories/`).then(response => {
             return response.data;
