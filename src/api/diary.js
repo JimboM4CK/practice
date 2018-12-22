@@ -1,15 +1,15 @@
 import Api from '@/api/api'
 
 export default {
-    getDiaryStaff (params) {
-        return Api().get(`/diary/${params.date}/staff`).then(response => {
+    getDiaryStaff () {
+        return Api().get(`/diary/staff`).then(response => {
             return response.data;
         }).catch(error => {
             return {error: error}
         });
     },
     getDiaryEntries (params) {
-        return Api().get(`/diary/${params.date}/entries`).then(response => {
+        return Api().get(`/diary/entries?date=${params.date}`).then(response => {
             return response.data;
         }).catch(error => {
             return {error: error}

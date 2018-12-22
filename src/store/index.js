@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import Api from '@/api'
+import date from '@/helpers/date'
 //import { isContext } from 'vm';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
@@ -23,6 +25,9 @@ export default new Vuex.Store({
     },
     diaryDate: state => {
       return state.diaryDate;
+    },
+    diaryDateIso: state => {
+      return date.dateToIso(state.diaryDate);
     },
     isLoggedIn: state => {
       //TODO: Read JWT file and make sure is valid
@@ -62,55 +67,77 @@ export default new Vuex.Store({
     },
     decrementDiaryDate(state){
       state.diaryDate.setDate(state.diaryDate.getDate() - 1);
+    },
+    processDiaryData(state, payload){
+      console.log(payload);
     }
   },
   actions: {
-    
+
+    async initialLoad(context){
+      try {
+        //let results = await Promise.all([
+        await Promise.all([
+          context.dispatch('diaryData', {id: context.getters.diaryDateIso})
+        ]);
+        return Promise.resolve(true);
+      } catch(err) {
+        return Promise.reject(err);
+      }
+      //load diary info for today
+    },
+
     checkForUpdates(){
-      //let response = await this.$api.checkForUpdates()
+      //let response = await Api.checkForUpdates()
       //response
       //checks through a table that has last table update for that company
       //iterate response rows and check lastUpdate objects
       //update if needed
     },
-    updateCompany(){
-      //fetch company data
-      //this.actions.setLastUpdate('')
-      
+
+    async fetchGroupInfo( context, payload ){
+        try {
+          let result = await Api.Groups.getGroup(payload.id);
+          return Promise.resolve(result);
+        } catch(err) {
+          return Promise.reject(err);
+        }
     },
-    fetchGroupInfo( context, payload ){
-      this.$api.groups.getGroup(payload.id).then( data => {
-        context.commit('setGroupInfo', data);
-      });
-    },
-    fetchCompanyInfo( context, payload ){
-      this.$api.groups.getGroup(payload.id).then( data => {
-        context.commit('setCompanyInfo', data);
-      });
+
+    async fetchCompanyInfo( context, payload ){
+      try {
+        let result = await Api.Companies.getCompany(payload.id);
+        return Promise.resolve(result);
+      } catch(err) {
+        return Promise.reject(err);
+      }
     },
     
-    login(context, payload){
-      if(!this.$store.getters.isLoggedIn){
-        this.$api.login({email: payload.email, password: payload.password}).then( data => {
-            context.commit('setJWT', data);
-        });
+    async login(context, payload){
+      try {
+        let data = await Api.login({email: payload.email, password: payload.password});
+        context.commit('setJWT', {token: data.token});
+        context.commit('setUserInfo', {user: data.userInfo});
+        context.commit('setCompanyInfo', {user: data.companyInfo});
+        context.commit('setGroupInfo', {user: data.groupInfo});
+        return Promise.resolve(true);
+      } catch(err) {
+        return Promise.reject(err);
       }
     },
-    async loadDiary(context){
-      if(!this.$store.getters.isLoggedIn){
-        let diaryStaff = this.$api.diary.getDiaryStaff({date: this.$store.getters.diaryDate}).then( data => {
-          return data;
-        });
-        let diaryEntries = this.$api.diary.getDiaryEntries({date: this.$store.getters.diaryDate}).then( data => {
-          return data;
-        });
-        let data = {};
-        data.diaryStaff = await diaryStaff;
-        data.diaryStaff = await diaryEntries;
-        context.commit('setDiaryData', data);
+
+    async diaryData({commit}, payload){
+      try {
+        let results = await Promise.all([
+          Api.Diary.getDiaryStaff(),
+          Api.Diary.getDiaryEntries({date: payload.date})
+        ]);
+        commit('processDiaryData', results);
+        return Promise.resolve(true);
+      } catch(err) {
+        return Promise.reject(err);
       }
     }
-
   },
   strict: process.env.NODE_ENV !== 'production'
 })

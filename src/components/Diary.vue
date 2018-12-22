@@ -11,23 +11,23 @@
             <div :id="'diary-content'">
                 <div :id="'time'">
                     <div class="diary-col">
-                        <div v-for="(timeSlot,index) in slots" 
+                        <div v-for="(slot,index) in timeSlots" 
                             :key="index" 
-                            :data-hour="timeSlot.hour" 
-                            :data-minute="timeSlot.minute | formattedMinute" 
+                            :data-hour="slot.hour" 
+                            :data-minute="slot.minute | formattedMinute" 
                             class="diary-row"
                         > 
-                            <span v-if="timeSlot.minute == 0" class="hour">{{ timeSlot.hour }}</span>
-                            <span class="minutes">{{ timeSlot.minute | formattedMinute }}</span>
+                            <span v-if="slot.minute == 0" class="hour">{{ slot.hour }}</span>
+                            <span class="minutes">{{ slot.minute | formattedMinute }}</span>
                         </div>
                     </div>
                 </div>
                 <div :id="'staff'">
                     <div v-for="(staffMember, index) in staffMembers" :key="index" class="diary-col" :data-staff-id="staffMember.id">
-                        <div v-for="(timeSlot,index) in slots" 
+                        <div v-for="(slot,index) in timeSlots" 
                             :key="index" 
-                            :data-hour="timeSlot.hour" 
-                            :data-minute="timeSlot.minute | formattedMinute" 
+                            :data-hour="slot.hour" 
+                            :data-minute="slot.minute | formattedMinute" 
                             class="diary-row"
                         ></div>
                     </div>
@@ -51,6 +51,7 @@ export default {
             timer: null,
             practice: [],
             staffMembers: [],
+            timeSlots: [],
             entries: [],
         }
     },
@@ -78,22 +79,14 @@ export default {
     methods: {
         fetchData(){
 
-            if(this.$store.getters.isLoggedIn){
-                
-
                 //this.practice = this.staffMembers = this.entries = this.error = null;
                 this.loading = true;
                 
                 //fetch diary data for date this.date
-                this.$store.dispatch('diaryData', {date: this.$store.getters.diaryDate});
-                
+                //this.$store.dispatch('diaryData', {date: this.$store.getters.diaryDate});
 
                 //set loaded diary objects to component data: diary
-                this.diary = diary;
                 this.loading = false;
-                this.loaded = true;
-
-            }
         }
     },
     filters: {
@@ -101,14 +94,18 @@ export default {
             return value.length > 1 ? value : `${value}0`;
         }
     },
-    created (){
+    async created (){
         //TODO: CREATE LOGIN PAGE
-        this.$store.dispatch('login', {email: "james.mackay@gmail.com", password: "Test"});
-        this.$store.dispatch('diaryData');
-        
+        await this.$store.dispatch('login', {email: "james.mackay@gmail.com", password: "Test"});
 
-        this.fetchData();
-        this.timer = setInterval(this.fetchData, 5000);
+        this.$store.dispatch('diaryData', {date: this.$store.getters.diaryDateIso}).then( response => {
+            console.log('diary date fetched');
+        }).catch( error => {
+            console.log(error);
+        });
+
+        //this.fetchData();
+        //this.timer = setInterval(this.fetchData, 5000);
     },
 }
 </script>

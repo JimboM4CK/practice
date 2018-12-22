@@ -12,7 +12,7 @@ export default {
             email: params.email,
             password: params.password
         }).then(response => {
-            return {token: response.data.token};
+            return response.data;
         }).catch(error => {
             return {error: error}
         });
