@@ -14,5 +14,19 @@ export default {
         }).catch(error => {
             return {error: error}
         });
+    },
+    addDiaryEntry (params) {
+        return Api().post(`/diary/entries/add`, params).then(response => {
+            return response.data;
+        }).catch(error => {
+            return {error: error}
+        });
+    },
+    removeDiaryEntry (params) {
+        return Api().post(`/diary/entries/remove`, params).then(response => {
+            return response.data;
+        }).catch(error => {
+            return {error: error}
+        });
     }
 }

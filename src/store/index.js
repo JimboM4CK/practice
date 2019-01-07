@@ -2,6 +2,9 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Api from '@/api'
 import date from '@/helpers/date'
+
+import StaffMember from '@/models/StaffMember'
+
 //import { isContext } from 'vm';
 
 Vue.use(Vuex);
@@ -9,13 +12,18 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     lastUpdate: {},
-    diaryData: {},
+    diaryData: {
+      date: new Date(),
+      entries: {},
+      staffMembers: {}
+    },
+    diaryAction: null,
     userInfo: {},
     groupInfo: {},
     companyInfo: {},
-    diaryDate: new Date(),
     JWT: '',
   },
+
   getters: {
     JWT: state => {
       return state.JWT;
@@ -23,11 +31,11 @@ export default new Vuex.Store({
     diaryData: state => {
       return state.diaryData;
     },
-    diaryDate: state => {
-      return state.diaryDate;
+    diaryAction: state => {
+      return state.diaryAction;
     },
     diaryDateIso: state => {
-      return date.dateToIso(state.diaryDate);
+      return date.dateToIso(state.diaryData.date);
     },
     isLoggedIn: state => {
       //TODO: Read JWT file and make sure is valid
@@ -41,6 +49,9 @@ export default new Vuex.Store({
     },
     companyInfo: state => {
       return state.companyInfo;
+    },
+    timeZone: state => {
+      return state.companyInfo.TimeZone;
     }
   },
   mutations: {
@@ -48,28 +59,47 @@ export default new Vuex.Store({
       state.JWT = payload.token;
     },
     setUserInfo(state, payload){
-      state.userInfo = payload;
+      state.userInfo = payload.userInfo;
     },
     setGroupInfo(state, payload){
-      state.groupInfo = payload;
+      state.groupInfo = payload.groupInfo;
     },
     setCompanyInfo(state, payload){
-      state.companyInfo = payload;
+      state.companyInfo = payload.companyInfo;
     },
     setDiaryData(state, payload){
       state.diaryData = payload.date;
     },
+    setDiaryAction(state, payload){
+      state.diaryAction = payload.action;
+    },
     setDiaryDate(state, payload){
-      state.diaryDate = payload.date;
+      state.diaryData.date = payload.date;
     },
     incrementDiaryDate(state){
-      state.diaryDate.setDate(state.diaryDate.getDate() + 1);
+      state.diaryData.date.setDate(state.diaryData.date.getDate() + 1);
     },
     decrementDiaryDate(state){
-      state.diaryDate.setDate(state.diaryDate.getDate() - 1);
+      state.diaryData.date.setDate(state.diaryData.date.getDate() - 1);
     },
     processDiaryData(state, payload){
-      console.log(payload);
+      state.diaryData.staffMembers = payload[0];
+      let staffMembers = payload[0];
+      let entries = payload[1];
+      let staffMemberList = [];
+      staffMembers.forEach(staffMember => {
+        staffMemberList.push(new StaffMember(staffMember));
+      });
+      state.diaryData = { ...state.diaryData, staffMembers: staffMemberList }
+
+      let entryList = [];
+      entries.forEach(entry => {
+        if(typeof entryList[entry.StaffID] === 'undefined') entryList[entry.StaffID] = {};
+        if(typeof entryList[entry.StaffID][entry.EntryType] === 'undefined') entryList[entry.StaffID][entry.EntryType] = [];
+        entryList[entry.StaffID][entry.EntryType].push(entry);
+      });
+      state.diaryData = { ...state.diaryData, entries: entryList }
+
     }
   },
   actions: {
@@ -117,22 +147,57 @@ export default new Vuex.Store({
       try {
         let data = await Api.login({email: payload.email, password: payload.password});
         context.commit('setJWT', {token: data.token});
-        context.commit('setUserInfo', {user: data.userInfo});
-        context.commit('setCompanyInfo', {user: data.companyInfo});
-        context.commit('setGroupInfo', {user: data.groupInfo});
+        context.commit('setUserInfo', {userInfo: data.userInfo});
+        context.commit('setCompanyInfo', {companyInfo: data.companyInfo});
+        context.commit('setGroupInfo', {groupInfo: data.groupInfo});
         return Promise.resolve(true);
       } catch(err) {
         return Promise.reject(err);
       }
     },
 
-    async diaryData({commit}, payload){
+    async diaryData({commit, getters}, payload){
       try {
         let results = await Promise.all([
           Api.Diary.getDiaryStaff(),
           Api.Diary.getDiaryEntries({date: payload.date})
         ]);
+        let slotMinutes = getters.companyInfo.SlotMinutes;
+        results[1].forEach(entry => {
+          let startTime = new Date(entry.StartTime);
+          let endTime = new Date(entry.EndTime);
+          entry.TimeSlots = (endTime.getTime() - startTime.getTime()) / (slotMinutes * 60000);
+        });
         commit('processDiaryData', results);
+        return Promise.resolve(true);
+      } catch(err) {
+        return Promise.reject(err);
+      }
+    },
+
+    async diaryAddReservation( {dispatch, getters}, payload ){
+      try {
+        await Api.Diary.addDiaryEntry({
+          type: 'reservation', 
+          startTime: payload.startTime.toUTCString(), 
+          endTime: payload.endTime.toUTCString(),
+          staffId: payload.staffId
+        });
+        dispatch('diaryData', {date: getters.diaryDateIso});
+        return Promise.resolve(true);
+      } catch(err) {
+        return Promise.reject(err);
+      }
+    },
+    async diaryRemoveReservation( {dispatch, getters}, payload ){
+      try {
+        await Api.Diary.removeDiaryEntry({
+          type: 'reservation', 
+          startTime: payload.startTime.toUTCString(), 
+          endTime: payload.endTime.toUTCString(),
+          staffId: payload.staffId
+        });
+        dispatch('diaryData', {date: getters.diaryDateIso});
         return Promise.resolve(true);
       } catch(err) {
         return Promise.reject(err);

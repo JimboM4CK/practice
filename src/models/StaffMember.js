@@ -1,31 +1,16 @@
-export class StaffMember {
+export default class StaffMember {
 
-    set firstName(value){
-        this._firstName = value;
-    }
-  
-    get firstName(){
-      return this._firstName;
-    }
+  constructor(data){
+    this.data = data;
+  }
 
-    set lastName(value){
-        this._lastName = value;
-    }
-    
-    get lastName(){
-      return this._lastName;
-    }
-    
-    set id(value){
-      this._id = value;
-    }
-    
-    get id(){
-      return this._id;
-    }
+  get id(){
+    return this.data.StaffID;
+  }
 
-    fullName(){
-      return `${this._firstName} ${this._lastName}`;
-    }
+  fullName(){
+    return `${(this.data.PreferredName ? this.data.PreferredName : this.data.FirstName)} ${this.data.LastName}`;
+    //return `${this._data.FirstName} ${this._data.LastName}`;
+  }
 
 }
