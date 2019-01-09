@@ -12,7 +12,7 @@ export default {
     props: ['type'],
     data(){
         return {
-            menu: null        
+            menu: null
         }
     },
     methods: {

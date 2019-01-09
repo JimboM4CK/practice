@@ -9,6 +9,7 @@
 <script>
 require('@/assets/semantic/dist/semantic.min.css')
 
+
 window.$ = window.jQuery = require('jquery')
 require('@/assets/semantic/dist/semantic.min.js')
 export default {

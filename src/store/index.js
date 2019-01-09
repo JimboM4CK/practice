@@ -86,6 +86,7 @@ export default new Vuex.Store({
       state.diaryData.staffMembers = payload[0];
       let staffMembers = payload[0];
       let entries = payload[1];
+      let rosters = payload[2];
       let staffMemberList = [];
       staffMembers.forEach(staffMember => {
         staffMemberList.push(new StaffMember(staffMember));
@@ -98,8 +99,12 @@ export default new Vuex.Store({
         if(typeof entryList[entry.StaffID][entry.EntryType] === 'undefined') entryList[entry.StaffID][entry.EntryType] = [];
         entryList[entry.StaffID][entry.EntryType].push(entry);
       });
+      rosters.forEach(entry => {
+        if(typeof entryList[entry.StaffID] === 'undefined') entryList[entry.StaffID] = {};
+        if(typeof entryList[entry.StaffID][entry.EntryType] === 'undefined') entryList[entry.StaffID][entry.EntryType] = [];
+        entryList[entry.StaffID][entry.EntryType].push(entry);
+      });
       state.diaryData = { ...state.diaryData, entries: entryList }
-
     }
   },
   actions: {
@@ -160,8 +165,10 @@ export default new Vuex.Store({
       try {
         let results = await Promise.all([
           Api.Diary.getDiaryStaff(),
-          Api.Diary.getDiaryEntries({date: payload.date})
+          Api.Diary.getDiaryEntries({date: payload.date}),
+          Api.Diary.getDiaryStaffRosters({date: payload.date}),
         ]);
+        console.log(results);
         let slotMinutes = getters.companyInfo.SlotMinutes;
         results[1].forEach(entry => {
           let startTime = new Date(entry.StartTime);
@@ -171,6 +178,7 @@ export default new Vuex.Store({
         commit('processDiaryData', results);
         return Promise.resolve(true);
       } catch(err) {
+        console.log(err);
         return Promise.reject(err);
       }
     },

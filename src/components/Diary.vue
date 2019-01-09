@@ -9,6 +9,7 @@
                 </div>
             </div>
             <div id="diary-content">
+                <TimeBar :time="time" :slotMinutes="slotMinutes" :startHour="startHour"></TimeBar>
                 <ContextMenu :type="contextMenuType"></ContextMenu>
                 <div id="time">
                     <div class="diary-col">
@@ -17,7 +18,6 @@
                             :data-hour="slot.hour | formattedHour" 
                             :data-minute="slot.minute | formattedMinute" 
                             class="diary-row"
-                            :class="{'current-time' : checkTime(slot.hour, slot.minute) }"
                         > 
                             <span v-if="slot.minute == 0" class="hour">{{ slot.hour }}</span>
                             <span class="minutes">{{ slot.minute | formattedMinute }}</span>
@@ -34,8 +34,7 @@
                             :class="{ 
                                 'reserved' : isReserved(staffMember.id, slot.hour, slot.minute),
                                 'unrostered' : !isRostered(staffMember.id, slot.hour, slot.minute),
-                                'occupied' : isAppointment(staffMember.id, slot.hour, slot.minute),
-                                'current-time' : checkTime(slot.hour, slot.minute) 
+                                'occupied' : isAppointment(staffMember.id, slot.hour, slot.minute)
                             }"
                             @contextmenu="contextMenu($event)"
                             v-on:click="selectRow"
@@ -55,96 +54,23 @@
 </template>
 
 <script>
+var $ = window.$;
+
 require('@/assets/css/practice.css');
-//require('@/assets/js/diary.js')
+require('@/assets/js/diary.js');
 
-var selection = { X: 0, Y: 0 },
-    mouse = { X: 0, Y: 0 },
-    selecting = false;
-
-$(function(){
-	$(document).on('mousedown', function(e){
-		if(!$(e.target).hasClass('diary-row')) return;
-		selection.X = e.pageX;
-        selection.Y = e.pageY;
-        if($(e.target).hasClass('selected') && e.which == 3) return;
-		selecting = true;
-    });
-    
-    $(document).on('mousemove', function(e){
-		mouse.Y = e.pageY; 
-        mouse.X = e.pageX;
-		if(selecting){
-			row_collision(selection.Y, mouse.X, mouse.Y, selection.X, 'selected');
-			selection_rectangle(selection.X, selection.Y, mouse.X, mouse.Y);
-		} else {
-			$('.selection-rectangle').remove();
-		}
-	}).on('mouseup', function(e){
-		
-		if(selecting){ 
-			row_collision(selection.Y, mouse.X, mouse.Y, selection.X, 'selected');
-			selection_rectangle(selection.X, selection.Y, mouse.X, mouse.Y);
-		} else {
-			$('.selection-rectangle').remove();
-		}
-		selecting = false;
-    });
-    
-});
-
-
-function selection_rectangle(x1, y1, x2, y2){
-	if(!selecting) return;
-    if(!$('.selection-rectangle').length) $('#staff').append('<div class="selection-rectangle"></div>');
-    let minX = $('#staff').offset().left+4;
-    let minY = $('#staff').offset().top;
-    let maxX = minX + $('#staff').outerWidth();
-    let maxY = minY + $('#staff').outerHeight();
-
-	if(x1 > x2) x1 = [x2, x2 = x1][0];
-    if(y1 > y2) y1 = [y2, y2 = y1][0];
-    
-    if(x1 < minX) x1 = minX;
-    if(x2 > maxX) x2 = maxX;
-    if(y1 < minY) y1 = minY;
-    if(y2 > maxY) y2 = maxY;
-
-	$('.selection-rectangle').css('top', y1);
-	$('.selection-rectangle').css('left', x1);
-	$('.selection-rectangle').css('width', x2-x1);
-    $('.selection-rectangle').css('height', y2-y1);
-}
-
-function row_collision(top, right, bottom, left, classname){
-	bottom++;
-	if(top > bottom) top = [bottom, bottom = top][0];
-	if(left > right) left = [right, right = left][0];
-	$('#staff .diary-row').removeClass('selected');
-	$('#staff .diary-row').each(function(){
-		var row_top = $(this).offset().top;
-		var row_left = $(this).offset().left;
-		var row_bottom = row_top + $(this).height();
-		var row_right = row_left + $(this).width();
-		if (bottom < row_top || top > row_bottom || right < row_left || left > row_right){
-			// No detection
-		} else {
-			$(this).addClass(classname);
-		}
-	});
-}
-
-
-import ContextMenu from './ContextMenu.vue'
+import ContextMenu from './Diary.ContextMenu.vue'
+import TimeBar from './Diary.TimeBar.vue'
 
 export default {
     name: 'Diary',
     components: {
-		ContextMenu
+        ContextMenu,
+        TimeBar
 	},
     data(){
         return {
-            time: null,
+            time: false,
             loading: true,
             error: null,
             timer: {},
@@ -264,7 +190,7 @@ export default {
             return !!this.findEntries('Reservation', staffId, hour, minute).length;
         },
         isRostered(staffId, hour, minute){ 
-            return !!this.findEntries('Staff Roster', staffId, hour, minute).length;
+            return !!this.findEntries('Roster', staffId, hour, minute).length;
         },
         isAppointment(staffId, hour, minute){ 
             return !!this.findEntries('Appointment', staffId, hour, minute).length;
@@ -275,9 +201,7 @@ export default {
         },
         updateTime(){
             var current_time = this.$moment.tz(this.companyInfo.Timezone);
-			var hours = current_time.format('H');
-            var minutes = (Math.floor(current_time.format('m') / 10) * 10);
-            this.time = `${hours}:${this.$options.filters.formattedMinute(minutes)}`;
+            this.time = current_time.format('H:m');
         },
         checkTime(hour, minute){
             return this.time == `${hour}:${this.$options.filters.formattedMinute(minute)}`;
@@ -341,7 +265,7 @@ export default {
 
         async actionClearReservation(){
             let columns = $('.diary-row.selected.reserved').closest('.diary-col');
-            await Promise.all(columns.map(async (key, column) => {
+            await Promise.all(columns.map(async () => {
                 let reservation = {};
                 let selection = $('.diary-row.selected.reserved').first()
                 .prevUntil('.diary-row:not(.reserved)').addBack()
@@ -389,7 +313,10 @@ export default {
             this.startHour = startTime.getUTCHours();
             this.endHour = endTime.getUTCHours();
             this.slotMinutes = this.companyInfo.SlotMinutes;  
+            console.log(this.entries);
 
+
+            this.updateTime();
         } catch( error ) {
             this.error = error;
         }
@@ -397,7 +324,6 @@ export default {
         this.loading = false;
 
         this.fetchData();
-        this.updateTime();
 
         this.timer.fetchData = setInterval(this.fetchData, 10000);
         this.timer.updateTime = setInterval(this.updateTime, 5000);

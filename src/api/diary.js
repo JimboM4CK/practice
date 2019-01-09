@@ -15,6 +15,13 @@ export default {
             return {error: error}
         });
     },
+    getDiaryStaffRosters (params) {
+        return Api().get(`/diary/staff-roster?date=${params.date}`).then(response => {
+            return response.data;
+        }).catch(error => {
+            return {error: error}
+        });
+    },
     addDiaryEntry (params) {
         return Api().post(`/diary/entries/add`, params).then(response => {
             return response.data;
