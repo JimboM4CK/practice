@@ -21,7 +21,7 @@ export default new Vuex.Store({
     userInfo: {},
     groupInfo: {},
     companyInfo: {},
-    JWT: '',
+    JWT: ''
   },
 
   getters: {
@@ -168,7 +168,6 @@ export default new Vuex.Store({
           Api.Diary.getDiaryEntries({date: payload.date}),
           Api.Diary.getDiaryStaffRosters({date: payload.date}),
         ]);
-        console.log(results);
         let slotMinutes = getters.companyInfo.SlotMinutes;
         results[1].forEach(entry => {
           let startTime = new Date(entry.StartTime);
@@ -178,7 +177,6 @@ export default new Vuex.Store({
         commit('processDiaryData', results);
         return Promise.resolve(true);
       } catch(err) {
-        console.log(err);
         return Promise.reject(err);
       }
     },

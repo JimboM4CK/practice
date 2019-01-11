@@ -202,6 +202,8 @@
 	#time .diary-col .diary-row:nth-child(6n):after {display:none;}
 	#time .diary-col .diary-row .hour { position: absolute; font-size: 1.1rem; text-align: right; right: 1.4rem;}
 	
+	.context-target{position:absolute; width: 2px; height: 1px;}
+
 	.time-bar{position: absolute;
 		top: 0;
 		left: 0;

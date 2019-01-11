@@ -11,6 +11,8 @@
             <div id="diary-content">
                 <TimeBar :time="time" :slotMinutes="slotMinutes" :startHour="startHour"></TimeBar>
                 <ContextMenu :type="contextMenuType"></ContextMenu>
+                <ModalSingleBooking :data="bookingDetails"></ModalSingleBooking>
+
                 <div id="time">
                     <div class="diary-col">
                         <div v-for="(slot,index) in slots" 
@@ -59,14 +61,16 @@ var $ = window.$;
 require('@/assets/css/practice.css');
 require('@/assets/js/diary.js');
 
-import ContextMenu from './Diary.ContextMenu.vue'
-import TimeBar from './Diary.TimeBar.vue'
+import ContextMenu from '@/components/Diary/ContextMenu.vue'
+import TimeBar from '@/components/Diary/TimeBar.vue'
+import ModalSingleBooking from '@/components/Modals/SingleBooking.vue'
 
 export default {
     name: 'Diary',
     components: {
         ContextMenu,
-        TimeBar
+        TimeBar,
+        ModalSingleBooking
 	},
     data(){
         return {
@@ -77,7 +81,9 @@ export default {
             startHour: 0,
             endHour: 0,
             slotMinutes: 0,
-            contextMenuType: ''
+            contextMenuType: '',
+            targetRow: {},
+            bookingDetails: {staffId:1, time:new Date()}
         }
     },
     computed: {
@@ -129,24 +135,33 @@ export default {
         },
         contextMenu(e){
             e.preventDefault();
-            let $el = $(e.target);
-            if($el.hasClass('diary-row')){
-                if(!$el.hasClass('selected')){
+            this.targetRow = $(e.target);
+
+            let $staff = $('#staff');
+            if(!$('.context-target').length){
+                $('<div class="context-target"></div>').appendTo($('#staff'));
+            }
+            let $target = $('.context-target');
+            $target.css('top', e.clientY-$staff.offset().top).css('left', e.clientX-$staff.offset().left-1);
+
+            if(this.targetRow.hasClass('diary-row')){
+                if(!this.targetRow.hasClass('selected')){
                     $('.diary-row.selected').removeClass('selected');
-                    $el.addClass('selected');
+                    this.targetRow.addClass('selected');
                 }
-                if($el.hasClass('reserved')) this.contextMenuType = 'diaryRowReserved';
+                if(this.targetRow.hasClass('reserved')) this.contextMenuType = 'diaryRowReserved';
                 else this.contextMenuType = 'diaryRowEmpty';
 
-                $el.addClass('has-popup');
-                $el.popup({
+                $target.addClass('has-popup');
+                $target.popup({
                     popup: '.context-menu',
                     boundery: '#staff',
                     hoverable: true,
                     position: 'top center',
                     on: 'manual',
                     onHidden: function(){
-                        $el.removeClass('has-popup');
+                        $('.context-target').remove();
+                        $target.removeClass('has-popup');
                     }
                 }).popup('show');
             }
@@ -201,6 +216,10 @@ export default {
         },
         updateTime(){
             var current_time = this.$moment.tz(this.companyInfo.Timezone);
+            //var current_date = this.$moment.tz(this.companyInfo.Timezone).toDate();
+            //console.log(this.date);
+            //console.log(current_date);
+            //this.$store.commit('setDiaryDate', current_date);
             this.time = current_time.format('H:m');
         },
         checkTime(hour, minute){
@@ -209,7 +228,7 @@ export default {
 
         async executeAction() {
             if(this.diaryAction == '') return;
-            $('.diary-row.has-popup').popup('hide');
+            $('.has-popup').popup('hide');
             this[`action${this.diaryAction}`]();
             this.$store.commit('setDiaryAction', {action: ''});
         },
@@ -227,6 +246,7 @@ export default {
                 reservation.staffId = first.closest('.diary-col').data('staff-id');
                 selection.addClass('reserved');
                 selection.removeClass('selected');
+                
                 try {
                     await this.$store.dispatch('diaryAddReservation', reservation);
                     Promise.resolve();
@@ -236,7 +256,6 @@ export default {
                     //TODO: toast error ('could not add reservation: reason');       
                 }
             }));
-            return Promise.resolve();
         },
 
         async actionClearSelection(){
@@ -260,7 +279,6 @@ export default {
                     //TODO: toast error ('could not add reservation: reason');       
                 }
             }));
-            return Promise.resolve();
         },
 
         async actionClearReservation(){
@@ -289,7 +307,17 @@ export default {
                     //TODO: toast error ('could not add reservation: reason');       
                 }
             }));
-            return Promise.resolve();
+        },
+
+        async actionSingleBooking(){
+            let $col = this.targetRow.closest('.diary-col');
+            let time = new Date(this.date);
+            time.setHours(this.targetRow.attr('data-hour'));
+            time.setMinutes(this.targetRow.attr('data-minute'));
+            time.setSeconds(0,0);
+            this.bookingDetails.staffId = $col.attr('data-staff-id');
+            this.bookingDetails.time = time;
+            $('.ui.modal.single-booking').modal('show');
         }
     },
     filters: {

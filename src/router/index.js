@@ -7,7 +7,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      component: () => import('@/components/Diary.vue')
+      component: () => import('@/components/Diary/Diary.vue')
     }
   ]
 })

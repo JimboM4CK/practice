@@ -1,9 +1,10 @@
 import axios from 'axios'
 import store from '@/store'
+import config from '@/helpers/config'
 
 export default() => {
     return axios.create({
-        baseURL: `http://localhost:10010`,
+        baseURL: config.apiUrl,
         withCredentials: false,
         headers: {
             'Accept': 'application/json',
