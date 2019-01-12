@@ -2,11 +2,13 @@ import Api from '@/api/api'
 import Groups from '@/api/groups'
 import Companies from '@/api/companies'
 import Diary from '@/api/diary'
+import Clients from '@/api/clients'
 
 export default {
     Groups: Groups,
     Companies: Companies,
     Diary: Diary,
+    Clients: Clients,
     login (params) {
         return Api().post('/login', {
             email: params.email,
@@ -17,7 +19,7 @@ export default {
             return {error: error}
         });
     },
-    getPractice (params) {
+    getPractitice (params) {
         return Api().get(`/practice/${params.id}`).then(response => {
             return response.data;
         }).catch(error => {

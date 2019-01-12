@@ -10,20 +10,20 @@
 
 <script>
 var $ = window.$;
-
+import config from '@/helpers/config'
 export default {
     name: 'SelectClient',
     props: ['data'],
     methods: {
-        init(){
-            console.log(this.$api);
+        async init(){
+            console.log(`${config.apiUrl}/client/search/{query}`);
             $('.ui.search.client')
             .search({
                 type: 'title',
                 apiSettings: {
-                    minCharacters : 3,
-                    response: this.$api.searchClients('{query}')
+                    url: `${config.apiUrl}/client/search/{query}`                    
                 },
+                minCharacters: 3,
                 fullTextSearch: true
             });
         }
