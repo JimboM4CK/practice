@@ -3,9 +3,9 @@
         <input type="hidden" name="client" :value="clientId">
         <i class="dropdown icon"></i>
         <input class="search">
-        <div class="default text">Select a client</div>
+        <div class="default text">Search for a client</div>
         <div class="menu">
-            <div v-if="clientId" class="item" :key="index" :data-value="clientId">{{ clientName }}</div>
+            <div v-if="clientId" class="item" :data-value="clientId">{{ clientName }}</div>
         </div>
     </div>
 </template>
@@ -24,11 +24,12 @@ export default {
                 .dropdown({
                     apiSettings: {
                         responseAsync: async (settings, callback) => {
+                            let response = {
+                                success: true,
+                                results: []
+                            }
                             let query = settings.urlData.query;
-                            if(!query) return false;
-                            $('ui.dropdown.client').addClass('loading');
-                            let response = await this.$api.Clients.searchClients({query: query});
-                            $('ui.dropdown.client').removeClass('loading');
+                            if(query) response = await this.$api.Clients.searchClients({query: query});
                             callback(response);
                         }                  
                     },
@@ -43,10 +44,9 @@ export default {
                     },
                     fullTextSearch: true,
                     minCharacters: 3,
+                    clearable: true,
                     onChange: (value, text, $choice) => {
-                        console.log('test');
-                        
-                        this.$emit('client-selected', {episodeId:value, title: text});
+                        this.$emit('client-selected', {clientId: value, name: text});
                     }
                 });
             });

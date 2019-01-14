@@ -1,11 +1,10 @@
 <template>
-    <div :class="['ui', 'episode', 'fluid', 'search', 'dropdown', 'selection', !client.clientId ? 'disabled' : '']">
+    <div :class="['ui', 'episode', 'fluid', 'dropdown', 'selection', !episodesFound ? 'disabled' : '']">
         <input type="hidden" name="episode" :value="episode.episodeId">
         <i class="dropdown icon"></i>
-        <input class="search">
         <div class="default text">Select an episode...</div>
         <div class="menu">
-            <div v-if="episode.episodeId" class="item" :key="index" :data-value="episode.episodeId">{{ episode.Title }}</div>
+            <div v-if="episode.episodeId" class="item" :data-value="episode.episodeId">{{ episode.Title }}</div>
         </div>
     </div>
 </template>
@@ -17,17 +16,30 @@ import config from '@/helpers/config'
 export default {
     name: 'SelectEpisodeSingle',
     props: ['client', 'episode'],
+    data(){
+        return {
+            episodesFound: false
+        }
+    },
     methods: {
         async init(){
             $(() => {
                 $('.ui.dropdown.episode')
                 .dropdown({
+                    on: 'now',
                     apiSettings: {
                         responseAsync: async (settings, callback) => {
-                            if(!this.client.clientId) return callback(false);
-                            let response = await this.$api.Clients.clientEpisodes({clientId: this.client.clientId});
+                            let response = {
+                                success: true,
+                                results: []
+                            }
+                            let clientId = this.client.clientId;
+                            console.log(this.client);
+                            if(clientId) response = await this.$api.Clients.clientEpisodes({clientId: this.client.clientId});
+                            
+                            if(response.results.length) this.episodesFound = true;
                             callback(response);
-                        }                  
+                        },            
                     },
                     searchFields: [
                         'EpisodeID',
@@ -43,8 +55,18 @@ export default {
                         this.$emit('episode-selected', {episodeId:value, title: text});
                     }
                 });
+                if(this.client.clientId) $('.ui.dropdown.episode').dropdown('refresh');
             });
+        },
+        onClientChanged(){
+            this.episodesFound = true;
+            $('.ui.dropdown.episode .menu .item').remove();
+            $('.ui.dropdown.episode').dropdown('show');
+            //this.episodesFound = false;
         }
+    },
+    watch: {
+        client: 'onClientChanged',
     },
     created(){
         this.init();

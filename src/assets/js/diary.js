@@ -1,7 +1,8 @@
 
 var selection = { X: 0, Y: 0 },
 	mouse = { X: 0, Y: 0 },
-	selecting = false;
+	selecting = false,
+	lastMove = 0;
 
 $(function(){
 	$(document).on('mousedown', function(e){
@@ -13,6 +14,11 @@ $(function(){
 	});
 
 	$(document).on('mousemove', function(e){
+		lastMove++;
+		if(lastMove < 4) return;
+
+		lastMove = 0;
+		
 		mouse.Y = e.pageY; 
 		mouse.X = e.pageX;
 		if(selecting){

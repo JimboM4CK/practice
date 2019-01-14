@@ -11,7 +11,7 @@
                 </div>
                 <div class="field">
                     <label>Episode</label>
-                    <SelectEpisodeSingle :client="client" :episode="episode"></SelectEpisodeSingle>
+                    <SelectEpisodeSingle :client="client" :episode="episode" @episode-selected="onEpisodeSelected"></SelectEpisodeSingle>
                 </div>
                 <div class="field">
                     <div class="ui checkbox">
@@ -42,13 +42,17 @@ export default {
     },
     data(){
         return {
-        client: {},
-        episode: {}
+            client: {},
+            episode: {}
         }
     },
     methods: {
         onClientSelected: function(data){
             this.client = {clientId: data.clientId, name: data.name};
+        },
+        
+        onEpisodeSelected: function(data){
+            this.episode = {episodeId: data.episodeId, title: data.title};
         }
     },
     props: ['data'],
