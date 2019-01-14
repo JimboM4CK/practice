@@ -7,11 +7,11 @@
                 <input type="hidden" name="time" :value="data.time" />
                 <div class="field">
                     <label>Client</label>
-                    <SelectClient data="{clientId:1}"></SelectClient>
+                    <SelectClientSingle :client="client" @client-selected="onClientSelected"></SelectClientSingle>
                 </div>
                 <div class="field">
-                    <label>Last Name</label>
-                    <input type="text" name="last-name" placeholder="Last Name">
+                    <label>Episode</label>
+                    <SelectEpisodeSingle :client="client" :episode="episode"></SelectEpisodeSingle>
                 </div>
                 <div class="field">
                     <div class="ui checkbox">
@@ -29,15 +29,28 @@
 </template>
 
 <script>
-import SelectClient from '@/components/Select/SelectClient.vue'
 import Modal from '@/components/Modals/Modal.vue'
+import SelectClientSingle from '@/components/Select/SelectClientSingle.vue'
+import SelectEpisodeSingle  from '@/components/Select/SelectEpisodeSingle.vue'
 
 export default {
     name: 'ModalSingleBooking',
     components: {
         Modal,
-        SelectClient
-	},
+        SelectClientSingle,
+        SelectEpisodeSingle
+    },
+    data(){
+        return {
+        client: {},
+        episode: {}
+        }
+    },
+    methods: {
+        onClientSelected: function(data){
+            this.client = {clientId: data.clientId, name: data.name};
+        }
+    },
     props: ['data'],
 }
 </script>

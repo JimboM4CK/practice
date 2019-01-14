@@ -19,7 +19,7 @@ export default {
             return {error: error}
         });
     },
-    getPractitice (params) {
+    getPractice (params) {
         return Api().get(`/practice/${params.id}`).then(response => {
             return response.data;
         }).catch(error => {
