@@ -26,7 +26,7 @@ export default {
             $(() => {
                 $('.ui.dropdown.episode')
                 .dropdown({
-                    on: 'now',
+                    on: 'test',
                     apiSettings: {
                         responseAsync: async (settings, callback) => {
                             let response = {
@@ -55,13 +55,15 @@ export default {
                         this.$emit('episode-selected', {episodeId:value, title: text});
                     }
                 });
-                if(this.client.clientId) $('.ui.dropdown.episode').dropdown('refresh');
             });
         },
         onClientChanged(){
+            //trigger episode lookup. then enable episode dropdown once completed.
+            console.log('changed');
             this.episodesFound = true;
-            $('.ui.dropdown.episode .menu .item').remove();
-            $('.ui.dropdown.episode').dropdown('show');
+            $('.ui.dropdown.episode .menu .item:not(.add-new)').remove();
+            let res = $('.ui.dropdown.episode').trigger('test');
+            console.log(res);
             //this.episodesFound = false;
         }
     },

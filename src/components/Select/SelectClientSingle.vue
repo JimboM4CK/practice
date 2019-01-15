@@ -1,11 +1,11 @@
 <template>
     <div :class="['ui', 'client', 'fluid', 'dropdown', 'search', 'selection']">
-        <input type="hidden" name="client" :value="clientId">
+        <input type="hidden" name="client" :value="client.clientId">
         <i class="dropdown icon"></i>
         <input class="search">
         <div class="default text">Search for a client</div>
         <div class="menu">
-            <div v-if="clientId" class="item" :data-value="clientId">{{ clientName }}</div>
+            <div v-if="client.clientId" class="item" :data-value="client.clientId">{{ client.name }}</div>
         </div>
     </div>
 </template>
@@ -16,7 +16,7 @@ var $ = window.$;
 import config from '@/helpers/config'
 export default {
     name: 'SelectClientSingle',
-    props: ['clientId', 'clientName'],
+    props: ['client'],
     methods: {
         async init(){
             $(() => {
