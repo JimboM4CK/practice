@@ -3,7 +3,7 @@
         <input type="hidden" name="client" :value="client.clientId">
         <i class="dropdown icon"></i>
         <input class="search">
-        <div class="default text">Search for a client</div>
+        <div class="default text">Start typing to search for a client...</div>
         <div class="menu">
             <div v-if="client.clientId" class="item" :data-value="client.clientId">{{ client.name }}</div>
         </div>

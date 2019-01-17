@@ -1,6 +1,6 @@
 <template>
     <Modal modalClass="single-booking">
-        <template slot="header" data-real-title="Single booking">Test</template>
+        <template slot="header">Single booking</template>
         <template slot="content">
             <form class="ui form">
                 <input type="hidden" name="staffId" :value="data.staffId" />

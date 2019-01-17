@@ -332,7 +332,6 @@ export default {
     },
     async created (){
         //TODO: CREATE LOGIN PAGE
-        
         try {
             await this.$store.dispatch('login', {email: "james.mackay@gmail.com", password: "Test"});
             await this.$store.dispatch('diaryData', {date: this.diaryDateIso});
@@ -340,10 +339,7 @@ export default {
             let endTime = new Date('1970-01-01T' + this.companyInfo.TimeClose + 'Z');
             this.startHour = startTime.getUTCHours();
             this.endHour = endTime.getUTCHours();
-            this.slotMinutes = this.companyInfo.SlotMinutes;  
-            console.log(this.entries);
-
-
+            this.slotMinutes = this.companyInfo.SlotMinutes;
             this.updateTime();
         } catch( error ) {
             this.error = error;

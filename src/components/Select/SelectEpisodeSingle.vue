@@ -1,14 +1,15 @@
 <template>
-    <div :class="['ui', 'episode', 'fluid', 'dropdown', 'selection', !episodesFound ? 'disabled' : '']">
-        <input type="hidden" name="episode" :value="episode.episodeId">
-        <i class="dropdown icon"></i>
-        <div class="default text">Select an episode...</div>
-        <div class="menu">
-            <div v-if="episode.episodeId" class="item" :data-value="episode.episodeId">{{ episode.Title }}</div>
+    <div>
+        <div :class="['ui', 'episode', 'fluid', 'dropdown', 'selection', episodeList.length ? '' : 'disabled']">
+            <input type="hidden" name="episode" :value="episode.episodeId">
+            <i class="dropdown icon"></i>
+            <div class="default text">Select an episode...</div>
+            <div class="menu">
+                <div v-if="episode.episodeId" class="item" :data-value="episode.episodeId">{{ episode.Title }}</div>
+            </div>
         </div>
     </div>
 </template>
-
 
 <script>
 var $ = window.$;
@@ -18,60 +19,67 @@ export default {
     props: ['client', 'episode'],
     data(){
         return {
-            episodesFound: false
+            episodeList: [],
         }
     },
+    computed: {
+        dropdown: function(){
+            return $('.ui.dropdown.episode');
+        },
+    },
     methods: {
-        async init(){
+        async initiateDropdown(){
             $(() => {
-                $('.ui.dropdown.episode')
-                .dropdown({
-                    on: 'test',
-                    apiSettings: {
-                        responseAsync: async (settings, callback) => {
-                            let response = {
-                                success: true,
-                                results: []
-                            }
-                            let clientId = this.client.clientId;
-                            console.log(this.client);
-                            if(clientId) response = await this.$api.Clients.clientEpisodes({clientId: this.client.clientId});
-                            
-                            if(response.results.length) this.episodesFound = true;
-                            callback(response);
-                        },            
-                    },
-                    searchFields: [
-                        'EpisodeID',
-                        'Title'
-                    ],
-                    fields: {
-                        name: 'Title',
-                        value: 'EpisodeID'
-                    },
-                    fullTextSearch: true,
-                    minCharacters: 0,
+                this.dropdown.dropdown({
                     onChange: (value, text, $choice) => {
-                        this.$emit('episode-selected', {episodeId:value, title: text});
+                        if(value.indexOf('action:') === 0) return this[value.replace('action:','')]();
+                        this.$emit('episode-selected', {episodeId:value, title: text});                        
                     }
                 });
+                if(this.episodeList.length) this.dropdown.dropdown('setup menu', {values: this.episodeList});
+                return Promise.resolve();
             });
         },
+        async refreshEpisodeList(clearSelected){
+            //fetch items
+            this.episodeList = [];
+            if(clearSelected) this.dropdown.dropdown('clear');
+            this.dropdown.dropdown('set loading');
+            this.episodeList = [];
+            if(this.client.clientId){
+                let episodes = await this.$api.Clients.clientEpisodes({clientId: this.client.clientId});
+                this.episodeList.push({name: '<label class="ui blue label">Add a new episode...</label>', value: 'action:onNewEpisode'});
+                if(episodes.results.length){
+                    episodes.results.forEach((episode) => {
+                        let listItem = {
+                            name: episode.Title,
+                            value: episode.EpisodeID
+                        }
+                        this.episodeList.push(listItem);
+                    });
+                }
+            }
+            await this.initiateDropdown();
+            return Promise.resolve();
+        },
         onClientChanged(){
-            //trigger episode lookup. then enable episode dropdown once completed.
-            console.log('changed');
-            this.episodesFound = true;
-            $('.ui.dropdown.episode .menu .item:not(.add-new)').remove();
-            let res = $('.ui.dropdown.episode').trigger('test');
-            console.log(res);
-            //this.episodesFound = false;
+            this.refreshEpisodeList(true);
+        },
+        onNewEpisode(){
+            //show new episode modal?
+            $('.ui.modal.new-episode').modal('show');
+        },
+        async onEpisodeAdded(value){
+            await this.refreshEpisodeList(true);
+            this.dropdown.dropdown('set selected', value); 
         }
     },
     watch: {
-        client: 'onClientChanged',
+        client: 'onClientChanged'
     },
     created(){
-        this.init();
+        this.initiateDropdown();
+        if(this.episode.length) this.refreshEpisodeList(false);
     }
 }
 </script>
