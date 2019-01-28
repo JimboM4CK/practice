@@ -1,29 +1,45 @@
 <template>
-    <Modal modalClass="single-booking">
+    <Modal :id="id" modalClass="single-booking">
         <template slot="header">Single booking</template>
         <template slot="content">
             <form class="ui form">
                 <input type="hidden" name="staffId" :value="data.staffId" />
                 <input type="hidden" name="time" :value="data.time" />
-                <div class="field">
-                    <label>Client</label>
-                    <SelectClientSingle :client="client" @client-selected="onClientSelected"></SelectClientSingle>
-                </div>
-                <div class="field">
-                    <label>Episode</label>
-                    <SelectEpisodeSingle :client="client" :episode="episode" @episode-selected="onEpisodeSelected"></SelectEpisodeSingle>
-                </div>
-                <div class="field">
-                    <div class="ui checkbox">
-                    <input type="checkbox" tabindex="0" class="hidden">
-                    <label>I agree to the Terms and Conditions</label>
+                <div class="ui grid">
+                    <div class="doubling two column row">
+                        <div class="column">
+                            <div class="field">
+                                <label>Client</label>
+                                <SelectClientSingle :parentId="id" :client="client" @client-selected="onClientSelected" />
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="field">
+                                <label>Episode</label>
+                                <SelectEpisodeSingle :parentId="id" :client="client" :episode="episode" @episode-selected="onEpisodeSelected" />
+                            </div>
+                        </div>
                     </div>
+                    <div class="ui divider"></div>
+                    <div class="one wide row"> 
+                        <div class="column">
+                            <label>Services</label>
+                            <CartItems />
+                        </div>
+                    </div>
+                   <!-- 
+                        <Services/>
+                        <Products/>
+                        <Notes/>
+                        <Room/> 
+                    -->
+
                 </div>
             </form>
         </template>
         <template slot="actions">
-            <div class="ui button">Cancel</div>
             <div class="ui button">OK</div>
+            <div class="ui button">Cancel</div>
         </template>
     </Modal>
 </template>
@@ -32,18 +48,21 @@
 import Modal from '@/components/Modals/Modal.vue'
 import SelectClientSingle from '@/components/Select/SelectClientSingle.vue'
 import SelectEpisodeSingle  from '@/components/Select/SelectEpisodeSingle.vue'
+import CartItems  from '@/components/Cart/Items.vue'
 
 export default {
     name: 'ModalSingleBooking',
     components: {
         Modal,
         SelectClientSingle,
-        SelectEpisodeSingle
+        SelectEpisodeSingle,
+        CartItems
     },
     data(){
         return {
             client: {},
-            episode: {}
+            episode: {},
+            id: 'single-booking'
         }
     },
     methods: {

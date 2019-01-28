@@ -8,23 +8,29 @@
                 <div v-if="episode.episodeId" class="item" :data-value="episode.episodeId">{{ episode.Title }}</div>
             </div>
         </div>
+        <ModalNewEpisode @complete="onNewEpisodeCompleted" @cancel="onNewEpisodeCancelled"></ModalNewEpisode>
     </div>
 </template>
 
 <script>
 var $ = window.$;
 import config from '@/helpers/config'
+import ModalNewEpisode from '@/components/Modals/NewEpisode.vue'
 export default {
     name: 'SelectEpisodeSingle',
-    props: ['client', 'episode'],
+    props: ['client', 'episode', 'parentId'],
+    components: {
+        ModalNewEpisode
+    },
     data(){
         return {
             episodeList: [],
+            $episodeModal: null
         }
     },
     computed: {
         dropdown: function(){
-            return $('.ui.dropdown.episode');
+            return $(`#${this.parentId} .ui.dropdown.episode`);
         },
     },
     methods: {
@@ -48,7 +54,7 @@ export default {
             this.episodeList = [];
             if(this.client.clientId){
                 let episodes = await this.$api.Clients.clientEpisodes({clientId: this.client.clientId});
-                this.episodeList.push({name: '<label class="ui blue label">Add a new episode...</label>', value: 'action:onNewEpisode'});
+                this.episodeList.push({name: '<label class="ui blue label">Add a new episode...</label>', value: 'action:showNewEpisode'});
                 if(episodes.results.length){
                     episodes.results.forEach((episode) => {
                         let listItem = {
@@ -65,9 +71,24 @@ export default {
         onClientChanged(){
             this.refreshEpisodeList(true);
         },
-        onNewEpisode(){
-            //show new episode modal?
-            $('.ui.modal.new-episode').modal('show');
+        async onNewEpisodeCompleted(episode){
+            console.log('onNewEpisodeComplete');
+            $(`#${this.parentId}`).modal('show');
+            await this.refreshEpisodeList(true);
+            this.dropdown.dropdown('set selected', episode.episodeId);
+            //this.refreshEpisodeList(true);
+        },
+        onNewEpisodeCancelled(){
+            console.log('onNewEpisodeCancelled');
+            this.dropdown.dropdown('clear');
+            $(`#${this.parentId}`).modal('show');
+            //show previous modal.
+            //clear selection.
+            //this.refreshEpisodeList(true);
+        },
+        showNewEpisode(){
+            //show new episode modal?            
+            this.$episodeModal.modal('show');
         },
         async onEpisodeAdded(value){
             await this.refreshEpisodeList(true);
@@ -80,6 +101,10 @@ export default {
     created(){
         this.initiateDropdown();
         if(this.episode.length) this.refreshEpisodeList(false);
+
+        $(() => {
+            this.$episodeModal = $(`#${this.parentId} .ui.modal.new-episode`);
+        });
     }
 }
 </script>

@@ -1,10 +1,9 @@
 <template>
-    <Modal modalClass="new-episode coupled">
-        <template slot="header" data-real-title="Single booking">New episode</template>
+    <Modal modalClass="new-episode">
+        <template slot="header">New episode</template>
         <template slot="content">
             <form class="ui form">
-                <input type="hidden" name="episodeId" :value="data.staffId" />
-                <input type="hidden" name="time" :value="data.time" />
+                <input type="hidden" name="episodeId" />
                 <div class="field">
                     <label>Episode</label>
                 </div>
@@ -17,8 +16,8 @@
             </form>
         </template>
         <template slot="actions">
-            <div class="ui button">Cancel</div>
-            <div class="ui button">OK</div>
+            <div class="ui button" v-on:click="onConfirm">OK</div>
+            <div class="ui button" v-on:click="$emit('cancel')">Cancel</div>
         </template>
     </Modal>
 </template>
@@ -34,6 +33,17 @@ export default {
     props: ['data'],
     data(){
         return {
+        }
+    },
+    methods: {
+        onConfirm: function(){
+            //TODO: 
+            //Add fields
+            //check all fields
+            //submit await response.
+            //if ok return {episodeId: ''}
+
+            this.$emit('complete', {episodeId: 4});
         }
     }
 }
