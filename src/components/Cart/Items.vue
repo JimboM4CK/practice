@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="ui grid">
+        <div class="ui middle aligned grid">
             <div class="one wide row">
                 <div class="column">
                     <button class="mini ui button">
@@ -26,7 +26,7 @@
                             </div>
                         </template>
                         <template v-if="!item.loading">
-                            <div class="ui header">
+                            <div class="ui small header">
                                 <img :src="item.image" class="ui image">
                                 <div class="content">
                                     {{ item.title }}
@@ -46,9 +46,9 @@
                         <template v-if="!item.loading">
                             <div class="ui right labeled input">
                                 <div class="ui icon buttons">
-                                    <button class="ui button"><i class="up chevron icon"></i></button>
-                                    <button class="ui button">{{ item.isService ? 1 : item.quantity }}</button>
-                                    <button class="ui button"><i class="down chevron icon"></i></button>
+                                    <button :class="['ui', 'button', item.isService || item.isInvoice ? 'disabled' : '']"><i class="up chevron icon"></i></button>
+                                    <button :class="['ui', 'button', item.isService || item.isInvoice ? 'disabled' : '']">{{ item.quantity }}</button>
+                                    <button :class="['ui', 'button', item.isService || item.isInvoice ? 'disabled' : '']"><i class="down chevron icon"></i></button>
                                 </div>
                             </div>
                         </template>
@@ -62,8 +62,8 @@
                             </div>
                         </template>
                         <template v-if="!item.loading">
-                            <div class="ui right aligned">
-                                {{ item.price | toCurrency('ja-JP') }}
+                            <div class="ui right aligned small header">
+                                {{ item.price * item.quantity | toCurrency('en-AU') }}
                             </div>
                         </template>
                     </div>
@@ -87,6 +87,16 @@ export default {
                     subTitle: 'Physiotherapy | Item #: PY310 | 20 minutes',
                     image: 'https://semantic-ui.com/images/wireframe/image.png',
                     isService: true,
+                    quantity: 1,
+                    price: 74.95
+                },
+                {
+                    loading:false,
+                    title: 'OPC Pillow',
+                    subTitle: 'Fall asleep in the clouds.',
+                    image: 'https://semantic-ui.com/images/wireframe/image.png',
+                    isService: false,
+                    quantity: 3,
                     price: 74.95
                 }
             ]
