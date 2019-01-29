@@ -51,7 +51,7 @@ export default new Vuex.Store({
       return state.companyInfo;
     },
     timeZone: state => {
-      return state.companyInfo.TimeZone;
+      return state.companyInfo.Locale.Timezone;
     }
   },
   mutations: {
@@ -162,12 +162,14 @@ export default new Vuex.Store({
     },
 
     async diaryData({commit, getters}, payload){
+      
       try {
         let results = await Promise.all([
           Api.Diary.getDiaryStaff(),
           Api.Diary.getDiaryEntries({date: payload.date}),
           Api.Diary.getDiaryStaffRosters({date: payload.date}),
         ]);
+        
         let slotMinutes = getters.companyInfo.SlotMinutes;
         results[1].forEach(entry => {
           let startTime = new Date(entry.StartTime);

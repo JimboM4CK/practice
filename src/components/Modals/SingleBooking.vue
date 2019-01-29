@@ -5,7 +5,7 @@
             <form class="ui form" v-on:submit.prevent>
                 <input type="hidden" name="staffId" :value="data.staffId" />
                 <input type="hidden" name="time" :value="data.time" />
-                <div class="ui grid">
+                <div class="ui padded grid">
                     <div class="doubling two column row">
                         <div class="column">
                             <div class="field">

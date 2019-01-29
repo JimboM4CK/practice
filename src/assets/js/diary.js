@@ -4,7 +4,7 @@ var selection = { X: 0, Y: 0 },
 	selecting = false,
 	lastMove = 0;
 
-$(function(){
+jQuery(function($){
 	$(document).on('mousedown', function(e){
 		if(!$(e.target).hasClass('diary-row')) return;
 		selection.X = e.pageX;
@@ -15,15 +15,14 @@ $(function(){
 
 	$(document).on('mousemove', function(e){
 		lastMove++;
-		if(lastMove < 4) return;
-
+		if(lastMove < 1) return;
 		lastMove = 0;
-		
+
 		mouse.Y = e.pageY; 
 		mouse.X = e.pageX;
 		if(selecting){
 			row_collision(selection.Y, mouse.X, mouse.Y, selection.X, 'selected');
-			selection_rectangle(selection.X, selection.Y, mouse.X, mouse.Y);
+			//selection_rectangle(selection.X, selection.Y, mouse.X, mouse.Y);
 		} else {
 			$('.selection-rectangle').remove();
 		}
@@ -31,7 +30,7 @@ $(function(){
 		
 		if(selecting){ 
 			row_collision(selection.Y, mouse.X, mouse.Y, selection.X, 'selected');
-			selection_rectangle(selection.X, selection.Y, mouse.X, mouse.Y);
+			//selection_rectangle(selection.X, selection.Y, mouse.X, mouse.Y);
 		} else {
 			$('.selection-rectangle').remove();
 		}
@@ -40,7 +39,7 @@ $(function(){
 
 });
 
-
+/*
 function selection_rectangle(x1, y1, x2, y2){
 	if(!selecting) return;
 	if(!$('.selection-rectangle').length) $('#staff').append('<div class="selection-rectangle"></div>');
@@ -62,6 +61,7 @@ function selection_rectangle(x1, y1, x2, y2){
 	$('.selection-rectangle').css('width', x2-x1);
 	$('.selection-rectangle').css('height', y2-y1);
 }
+*/
 
 function row_collision(top, right, bottom, left, classname){
 	bottom++;

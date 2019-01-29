@@ -70,6 +70,19 @@
                 </div>
             </template>
         </div>
+        <div class="ui section divider"></div>
+        <div class="ui middle aligned grid">
+            <div class="ten wide column">
+                <div class="ui medium header">
+                    Total
+                </div>
+            </div>
+            <div class="six wide column">
+                <div class="ui right aligned medium header">
+                    {{ cartTotal | toCurrency('en-AU') }}
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -82,13 +95,13 @@ export default {
         return {
             items: [
                 {
-                    loading:false,
+                    loading: false,
                     title: 'Standard Consultation',
                     subTitle: 'Physiotherapy | Item #: PY310 | 20 minutes',
                     image: 'https://semantic-ui.com/images/wireframe/image.png',
                     isService: true,
                     quantity: 1,
-                    price: 74.95
+                    price: 79.95
                 },
                 {
                     loading:false,
@@ -97,15 +110,21 @@ export default {
                     image: 'https://semantic-ui.com/images/wireframe/image.png',
                     isService: false,
                     quantity: 3,
-                    price: 74.95
+                    price: 29.25
                 }
             ]
         }
     },
     computed: {
+        
+        cartTotal: function(){
+            let total = this.items.reduce((result, object) => {
+                return result += object.price * object.quantity
+            }, 0);
+            return total;
+        }
     },
     methods: {
-       
     },
 }
 </script>

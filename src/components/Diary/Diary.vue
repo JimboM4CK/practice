@@ -215,8 +215,8 @@ export default {
             // do something?
         },
         updateTime(){
-            var current_time = this.$moment.tz(this.companyInfo.Timezone);
-            //var current_date = this.$moment.tz(this.companyInfo.Timezone).toDate();
+            var current_time = this.$moment.tz(this.companyInfo.Locale.Timezone);
+            //var current_date = this.$moment.tz(this.companyInfo.Locale.Timezone).toDate();
             //console.log(this.date);
             //console.log(current_date);
             //this.$store.commit('setDiaryDate', current_date);

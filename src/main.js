@@ -12,31 +12,15 @@ import store from '@/store'
 Vue.config.productionTip = false;
 Vue.prototype.$api = api;
 
-Vue.filter('toCurrency', function (value, locale) {
-  if(locale === undefined) locale = 'en-AU';
-
-  const numberFormats = {
-    'en-AU': {
-      currency: 'AUD',
-      decimals: 2
-    },
-    'en-US': {
-      currency: 'USD',
-      decimals: 2
-    },
-    'ja-JP': {
-      currency: 'JPY',
-      decimals: 0
-    }
-  }
-
+Vue.filter('toCurrency', function (value) {
   if (typeof value !== "number"){
     return value;
   }
-  var formatter = new Intl.NumberFormat(locale, {
+  let locale = store.getters.companyInfo.Locale;
+  var formatter = new Intl.NumberFormat(locale.LanguageCode, {
     style: 'currency',
-    currency: numberFormats[locale].currency,
-    minimumFractionDigits: numberFormats[locale].decimals
+    currency: locale.CurrencyCode,
+    minimumFractionDigits: locale.CurrencyDecimals
   });
   return formatter.format(value);
 });
