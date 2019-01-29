@@ -2,7 +2,7 @@
     <Modal modalClass="new-episode">
         <template slot="header">New episode</template>
         <template slot="content">
-            <form class="ui form">
+            <form class="ui form" v-on:submit.prevent>
                 <input type="hidden" name="episodeId" />
                 <div class="field">
                     <label>Episode</label>

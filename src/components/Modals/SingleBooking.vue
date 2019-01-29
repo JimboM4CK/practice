@@ -2,7 +2,7 @@
     <Modal :id="id" modalClass="single-booking">
         <template slot="header">Single booking</template>
         <template slot="content">
-            <form class="ui form">
+            <form class="ui form" v-on:submit.prevent>
                 <input type="hidden" name="staffId" :value="data.staffId" />
                 <input type="hidden" name="time" :value="data.time" />
                 <div class="ui grid">

@@ -17,13 +17,16 @@ Vue.filter('toCurrency', function (value, locale) {
 
   const numberFormats = {
     'en-AU': {
-      currency: 'AUD'
+      currency: 'AUD',
+      decimals: 2
     },
     'en-US': {
-      currency: 'USD'
+      currency: 'USD',
+      decimals: 2
     },
     'ja-JP': {
-      currency: 'JPY'
+      currency: 'JPY',
+      decimals: 0
     }
   }
 
@@ -33,7 +36,7 @@ Vue.filter('toCurrency', function (value, locale) {
   var formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: numberFormats[locale].currency,
-    minimumFractionDigits: 0
+    minimumFractionDigits: numberFormats[locale].decimals
   });
   return formatter.format(value);
 });

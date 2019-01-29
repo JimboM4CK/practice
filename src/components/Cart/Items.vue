@@ -3,13 +3,13 @@
         <div class="ui middle aligned grid">
             <div class="one wide row">
                 <div class="column">
-                    <button class="mini ui button">
+                    <button class="mini ui button disabled">
                         <i class="icon add"></i>
                         Add
                     </button>
                     <button class="mini ui button disabled">
                         <i class="icon remove"></i>
-                        Remove selected
+                        Add Misc.
                     </button>
                 </div>
             </div>
@@ -46,9 +46,9 @@
                         <template v-if="!item.loading">
                             <div class="ui right labeled input">
                                 <div class="ui icon buttons">
-                                    <button :class="['ui', 'button', item.isService || item.isInvoice ? 'disabled' : '']"><i class="up chevron icon"></i></button>
+                                    <button :class="['ui', 'button', item.isService || item.isInvoice ? 'disabled' : '']" v-on:click="item.quantity > 0 ? item.quantity -= 1 : 0"><i class="down chevron icon"></i></button>
                                     <button :class="['ui', 'button', item.isService || item.isInvoice ? 'disabled' : '']">{{ item.quantity }}</button>
-                                    <button :class="['ui', 'button', item.isService || item.isInvoice ? 'disabled' : '']"><i class="down chevron icon"></i></button>
+                                    <button :class="['ui', 'button', item.isService || item.isInvoice ? 'disabled' : '']" v-on:click="item.quantity += 1"><i class="up chevron icon"></i></button>
                                 </div>
                             </div>
                         </template>
